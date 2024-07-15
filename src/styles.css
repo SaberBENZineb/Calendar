@@ -1,1 +1,18 @@
-/* You can add global styles to this file, and also import other style files */
+.flatpickr-calendar {
+    display: none;
+}
+
+.calendar-container {
+    position: absolute;
+}
+
+:host {
+    display: contents;
+}
+
+.change-on-hover:hover {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
+

@@ -1,0 +1,77 @@
+[
+  {
+    "id": 1,
+    "start": "2024-06-19T24:00:00.000Z",
+    "end": "2024-06-25T17:45:59.779Z",
+    "title": "A 3 day event",
+    "color": {
+      "primary": "#ad2121",
+      "secondary": "#FAE3E3"
+    },
+    "draggable": true,
+    "resizable": {
+      "beforeStart": true,
+      "afterEnd": true
+    }
+  },
+  {
+    "id": 2,
+    "start": "2024-06-24T23:00:00.000Z",
+    "title": "An event with no end date",
+    "end": "2024-06-27T17:45:59.779Z",
+    "color": {
+      "primary": "#e3bc08",
+      "secondary": "#FDF1BA"
+    },
+    "draggable": true,
+    "resizable": {
+      "beforeStart": true,
+      "afterEnd": true
+    }
+  },
+  {
+    "id": 3,
+    "start": "2024-06-27T22:59:59.999Z",
+    "end": "2024-07-03T22:59:59.999Z",
+    "title": "A long event that spans 2 months",
+    "color": {
+      "primary": "#1e90ff",
+      "secondary": "#D1E8FF"
+    },
+    "draggable": true,
+    "resizable": {
+      "beforeStart": true,
+      "afterEnd": true
+    }
+  },
+  {
+    "id": 4,
+    "start": "2024-06-24T01:00:00.000Z",
+    "end": "2024-06-24T19:45:59.779Z",
+    "title": "A draggable and resizable event",
+    "color": {
+      "primary": "#e3bc08",
+      "secondary": "#FDF1BA"
+    },
+    "draggable": true,
+    "resizable": {
+      "beforeStart": true,
+      "afterEnd": true
+    }
+  },
+  {
+    "id": 5,
+    "title": "swiming",
+    "start": "2024-06-24T23:00:00.000Z",
+    "end": "2024-06-26T22:59:59.999Z",
+    "color": {
+      "primary": "#2131ab",
+      "secondary": "#FAE3E3"
+    },
+    "draggable": true,
+    "resizable": {
+      "beforeStart": true,
+      "afterEnd": true
+    }
+  }
+]
