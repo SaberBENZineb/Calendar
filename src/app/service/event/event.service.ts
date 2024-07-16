@@ -6,7 +6,7 @@ import { catchError, Observable, of, tap } from 'rxjs';
   providedIn: 'root',
 })
 export class EventService {
-  apiUrl: String = 'http://localhost:9090';
+  apiUrl: String = 'http://localhost:9090'; //Change me
 
   constructor(private http: HttpClient) {}
 

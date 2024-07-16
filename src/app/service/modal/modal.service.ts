@@ -14,7 +14,9 @@ export class ModalService {
     this.modalRef = this.modal.open(content);
     if (this.modalRef.componentInstance) {
       this.modalRef.componentInstance.modalData = data;
+      this.modalRef.componentInstance.action = data.event ? 'Update' : 'Add';
     }
+
     return this.modalRef.result.then(
       (result) => {
         console.log('Modal closed with result:', result);
@@ -31,6 +33,7 @@ export class ModalService {
   }
 
   close(result?: any): void {
+    console.log("result "+result);
     if (this.modalRef) {
       this.modalRef.close(result);
     }

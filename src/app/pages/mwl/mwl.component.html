@@ -13,7 +13,6 @@
         </button>
     </div>
 
-
     <div class="col-md-4">
         <div class="btn-group">
             <div class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate"
@@ -54,9 +53,11 @@
 
 <br />
 <div [ngSwitch]="view" style="max-width: 95%; margin: 0 auto;">
+    <!-- (dayClicked)="dayClicked($event.day)" -->
     <mwl-calendar-month-view *ngSwitchCase="CalendarView.Month" [viewDate]="viewDate" [events]="(events | async) ?? []"
-        [refresh]="refresh" [activeDayIsOpen]="activeDayIsOpen" (dayClicked)="dayClicked($event.day)"
-        (eventClicked)="openModal($event.event)" (eventTimesChanged)="eventTimesChanged($event)">
+        [refresh]="refresh" [activeDayIsOpen]="activeDayIsOpen"
+        (eventClicked)="openModal($event.event)" (eventTimesChanged)="eventTimesChanged($event)"
+        [cellTemplate]="customCellTemplate">
     </mwl-calendar-month-view>
     <mwl-calendar-week-view *ngSwitchCase="CalendarView.Week" [viewDate]="viewDate" [events]="(events | async) ?? []"
         [refresh]="refresh" (eventClicked)="openModal($event.event)" [dayStartHour]="7" [dayEndHour]="24"
@@ -68,59 +69,22 @@
     </mwl-calendar-day-view>
 </div>
 
-<ng-template #modalContent let-close="close">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title">{{action}} Event</h5>
-            <button type="button" class="btn-close" aria-label="Close"
-                (click)="modalService.dismiss('cross click')"></button>
-        </div>
-        <div class="modal-body">
-            <div class="mb-3">
-                <label for="title" class="form-label">Title:</label>
-                <input type="text" id="title" class="form-control" [(ngModel)]="modalData.event.title"
-                    (keyup)="refresh.next()" />
-            </div>
-            <div class="mb-3">
-                <label for="primaryColor" class="form-label">Primary:</label>
-                <input type="color" id="primaryColor" class="form-control form-control-color"
-                    [(ngModel)]="modalData.event.color!.primary" (change)="refresh.next()" />
-            </div>
-            <div class="mb-3">
-                <label for="secondaryColor" class="form-label">Secondary:</label>
-                <input type="color" id="secondaryColor" class="form-control form-control-color"
-                    [(ngModel)]="modalData.event.color!.secondary" (change)="refresh.next()" />
-            </div>
-            <div class="mb-3">
-                <label for="textColor" class="form-label">Text Color:</label>
-                <input type="color" id="textColor" class="form-control form-control-color"
-                    [ngModel]="modalData.event.color!.secondaryText ?? '#1e90ff'"
-                    (ngModelChange)="modalData.event.color!.secondaryText = $event" (change)="refresh.next()" />
-            </div>
-            <div *ngIf="authService.getRole() === 'ADMIN'">
-                <label for="start" class="form-label">Add collaborateur:</label> <br>
-                <ng-multiselect-dropdown [placeholder]="'Add collaborateur...'" [settings]="dropdownSettings"
-                    [data]="dropdownList" [(ngModel)]="selectedItems" (onSelect)="onItemSelect($event)"
-                    (onSelectAll)="onSelectAll($event)">
-                </ng-multiselect-dropdown>
-            </div>
-            <div class="mb-3">
-                <label for="start" class="form-label">Start:</label> <br>
-                <p-calendar inputId="start" [(ngModel)]="modalData.event.start" [showTime]="true" hourFormat="24">
-                </p-calendar>
-            </div>
-            <div class="mb-1">
-                <label for="end" class="form-label">End:</label><br>
-                <p-calendar inputId="end" [(ngModel)]="modalData.event.end" [showTime]="true" hourFormat="24"
-                    appDateRangeValidator [startDate]="modalData.event.start"></p-calendar>
-            </div>
-            <div *ngIf="endDateInvalid()" class="text-center" style="background-color: #eb6969; color: white; padding: 10px;border-radius: 5px;">end date must be after start date.</div>
-        </div>
-        <button type="button" class="btn btn-outline-secondary" style="margin-bottom: 2px;"
-            (click)="close(modalData.event)">{{action}}</button>
-        <button *ngIf="action === 'Update'" type="button" class="btn btn-danger" style="margin-bottom: 2px;"
-            (click)="close(modalData.event.id)">
-            Delete
-        </button>
+<ng-template #customCellTemplate let-day="day" let-locale="locale">
+    <div>
+        <span class="cal-day-badge" *ngIf="day.badgeTotal > 0">{{ day.badgeTotal }}</span>
+        <span class="cal-day-number">{{ day.date | calendarDate:'monthViewDayNumber':locale }}</span>
     </div>
+    <div *ngIf="day.badgeTotal > 0">
+        <div *ngFor="let event of day.events.slice(0, 2)" class="event-item" (click)="openModal(event)">
+            <span class="event-color" [ngStyle]="{'background-color': event.color.primary}"></span>
+            <span class="event-title">{{event.title}}</span>
+        </div>
+    </div>
+    <small style="margin-bottom:2px;" *ngIf="day.badgeTotal > 2">There are {{ day.events.length }} events on this day</small>
+</ng-template>
+
+
+<ng-template #modalContent let-close="close">
+    <app-modal [modalData]="modalData" [action]="action" [refresh]="refresh" (selectedItemsChange)="receiveData($event)">
+    </app-modal>
 </ng-template>

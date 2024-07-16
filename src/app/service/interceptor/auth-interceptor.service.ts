@@ -25,7 +25,6 @@ export class AuthInterceptor implements HttpInterceptor {
   }
   
   private shouldntIntercept(url: string): boolean {
-    console.log("url.startsWith('http://localhost:9090/api/v1/auth/')",url.startsWith('http://localhost:9090/api/v1/auth/'))
-    return url.startsWith('http://localhost:9090/api/v1/auth/');
+    return url.startsWith('http://localhost:9090/api/v1/auth/'); //Change me
   }
 }

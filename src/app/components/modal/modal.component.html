@@ -1,0 +1,57 @@
+<!-- modal.component.html -->
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">{{action}} Event</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="modalService.dismiss('cross click')"></button>
+    </div>
+    <div class="modal-body">
+        <div class="mb-3">
+            <label for="title" class="form-label">Title:</label>
+            <input type="text" id="title" class="form-control" [(ngModel)]="modalData.event.title"
+                (keyup)="refresh.next()" />
+        </div>
+        <div class="mb-3">
+            <label for="primaryColor" class="form-label">Primary:</label>
+            <input type="color" id="primaryColor" class="form-control form-control-color"
+                [(ngModel)]="modalData.event.color!.primary" (change)="refresh.next()" />
+        </div>
+        <div class="mb-3">
+            <label for="secondaryColor" class="form-label">Secondary:</label>
+            <input type="color" id="secondaryColor" class="form-control form-control-color"
+                [(ngModel)]="modalData.event.color!.secondary" (change)="refresh.next()" />
+        </div>
+        <div class="mb-3">
+            <label for="textColor" class="form-label">Text Color:</label>
+            <input type="color" id="textColor" class="form-control form-control-color"
+                [ngModel]="modalData.event.color!.secondaryText ?? '#1e90ff'"
+                (ngModelChange)="modalData.event.color!.secondaryText = $event" (change)="refresh.next()" />
+        </div>
+        <div *ngIf="authService.getRole() === 'ADMIN'">
+            <label for="start" class="form-label">Add collaborateur:</label> <br>
+            <ng-multiselect-dropdown [placeholder]="'Add collaborateur...'" [settings]="dropdownSettings"
+                [data]="dropdownList" [(ngModel)]="selectedItems" (onSelect)="onItemSelect($event)"
+                (onSelectAll)="onSelectAll($event)">
+            </ng-multiselect-dropdown>
+        </div>
+        <div class="mb-3">
+            <label for="start" class="form-label">Start:</label> <br>
+            <p-calendar inputId="start" [(ngModel)]="modalData.event.start" [showTime]="true" hourFormat="24">
+            </p-calendar>
+        </div>
+        <div class="mb-1">
+            <label for="end" class="form-label">End:</label><br>
+            <p-calendar inputId="end" [(ngModel)]="modalData.event.end" [showTime]="true" hourFormat="24"
+                appDateRangeValidator [startDate]="modalData.event.start"></p-calendar>
+        </div>
+        <div *ngIf="endDateInvalid()" class="text-center"
+            style="background-color: #eb6969; color: white; padding: 10px;border-radius: 5px;">
+            end date must be after start date.
+        </div>
+    </div>
+    <button type="button" class="btn btn-outline-secondary" style="margin-bottom: 2px;"
+        (click)="modalService.close(modalData.event)">{{action}}</button>
+    <button *ngIf="action === 'Update'" type="button" class="btn btn-danger" style="margin-bottom: 2px;"
+        (click)="modalService.close(modalData.event.id)">
+        Delete
+    </button>
+</div>

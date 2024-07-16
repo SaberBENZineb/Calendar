@@ -20,6 +20,7 @@ import { LogInComponent } from './pages/log-in/log-in.component';
 import { MwlComponent } from './pages/mwl/mwl.component';
 import { SignUpComponent } from './pages/sign-up/sign-up.component';
 import { AuthInterceptor } from './service/interceptor/auth-interceptor.service';
+import { ModalComponent } from './components/modal/modal.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { AuthInterceptor } from './service/interceptor/auth-interceptor.service'
     MwlComponent,
     SignUpComponent,
     LogInComponent,
+    ModalComponent,
   ],
   imports: [
     BrowserModule,

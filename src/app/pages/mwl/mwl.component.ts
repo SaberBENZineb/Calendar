@@ -11,7 +11,6 @@ import {
   CalendarView,
 } from 'angular-calendar';
 import { isSameDay, isSameMonth } from 'date-fns';
-import { IDropdownSettings } from 'ng-multiselect-dropdown';
 import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AuthService } from 'src/app/service/auth/auth.service';
@@ -27,21 +26,7 @@ import { UserService } from '../../service/user/user.service';
 @Component({
   selector: 'app-mwl',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: [
-    `
-      h3 {
-        margin: 0 0 10px;
-      }
-
-      pre {
-        background-color: #f5f5f5;
-        padding: 15px;
-      }
-      .selected-item {
-        max-width: none;
-      }
-    `,
-  ],
+  styleUrls:["./mwl.component.css"],
   templateUrl: './mwl.component.html',
   providers: [NgbActiveModal],
 })
@@ -64,7 +49,7 @@ export class MwlComponent {
 
   events: Observable<MyCalendarEvent[]> = this.eventsSubject.asObservable();
 
-  activeDayIsOpen: boolean = true;
+  activeDayIsOpen: boolean = false;
   action: string = '';
 
   constructor(
@@ -74,29 +59,9 @@ export class MwlComponent {
     private userService: UserService
   ) {}
 
-  dropdownList: any = [];
-  selectedItems: any = [];
-  dropdownSettings: IDropdownSettings = {};
-
   ngOnInit() {
     this.loadEvents();
     this.modalData = { event: defaultEvent };
-    if (this.authService.getRole() == 'ADMIN') {
-      this.userService.getUsers().subscribe((users) => {
-        users.forEach((user: any) => {
-          this.dropdownList.push({ item_id: user.email, item_text: user.name });
-        });
-      });
-      this.dropdownSettings = {
-        singleSelection: false,
-        idField: 'item_id',
-        textField: 'item_text',
-        selectAllText: 'Select All',
-        unSelectAllText: 'UnSelect All',
-        itemsShowLimit: 2,
-        allowSearchFilter: true,
-      };
-    }
   }
 
   selectedUser: string = 'All';
@@ -222,10 +187,14 @@ export class MwlComponent {
       this.modalContent as TemplateRef<any>,
       this.modalData
     );
-    if (this.isCalendarEvent(result)) {
-      this.update(result);
-    } else if (typeof result === 'number') {
-      this.deleteEvent(result);
+    this.handleClose(result);
+  }
+
+  handleClose(event: any) {
+    if (this.isCalendarEvent(event)) {
+      this.update(event);
+    } else if (typeof event === 'number') {
+      this.deleteEvent(event);
     }
   }
 
@@ -243,6 +212,12 @@ export class MwlComponent {
     return result ? result : null;
   }
 
+  selectedItems:any=[];
+  
+  receiveData(data: any) {
+    this.selectedItems = data;
+  }
+
   async addEvent() {
     const newEvent: MyCalendarEvent = { ...defaultEvent };
     const result = await this.openAddModal(newEvent);
@@ -251,7 +226,7 @@ export class MwlComponent {
       this.eventService.saveEvent(ServerEvent).subscribe((response: any) => {
         newEvent.id = response.id;
         console.log('add:' + JSON.stringify(ServerEvent));
-        if (this.authService.getRole()=="ADMIN") {
+        if (this.authService.getRole()=="ADMIN" && this.selectedItems.length>0) {
           let emails: string[] = this.selectedItems.map((item: any) => item.item_id);
           console.log('emails ' + emails.toString());
 
@@ -289,7 +264,7 @@ export class MwlComponent {
             })
           );
           this.refresh.next();
-          //this.eventsSubject.next(await firstValueFrom(this.events));
+          this.eventsSubject.next(await firstValueFrom(this.events));
         });
       }
     } catch (error) {
@@ -321,19 +296,15 @@ export class MwlComponent {
 
     if (updatedEvent) {
       const serverEventData = transformEventForServer(updatedEvent);
-      console.log('serverEventData: ' + JSON.stringify(serverEventData));
       this.eventService.updateEvent(serverEventData).subscribe((response:any)=>{
         console.log("updated successfully: ",response);
-        if (this.authService.getRole()=="ADMIN") {
+        if (this.authService.getRole()=="ADMIN" && this.selectedItems.length>0) {
           let emails: string[] = this.selectedItems.map((item: any) => item.item_id);
           console.log('emails ' + emails.toString());
-
           this.userService.assignEventToUsers(emails, event?.id).subscribe((res:any)=>{
             console.log('Event assigned to users successfully ',res);
           });
-          this.selectedItems=[];
         }
-        
         this.events.subscribe();
       });
     }
@@ -351,13 +322,4 @@ export class MwlComponent {
   closeOpenMonthViewDay() {
     this.activeDayIsOpen = false;
   }
-
-  endDateInvalid(): boolean | undefined {
-    const { start, end } = this.modalData.event;
-    return start && end && start >= end;
-  }
-
-  onItemSelect(item: any) {}
-  onSelectAll(items: any) {}
-
 }

@@ -7,7 +7,7 @@ import { BehaviorSubject, catchError, Observable, of, tap } from 'rxjs';
 })
 export class AuthService {
   private loggedIn = new BehaviorSubject<boolean>(false);
-  apiUrl:String="http://localhost:9090/api/v1/auth";
+  apiUrl:String="http://localhost:9090/api/v1/auth"; //Change me
   
   constructor(private http: HttpClient) {
     this.loggedIn.next(!!localStorage.getItem('jwtToken'));
