@@ -52,7 +52,6 @@ export class SignUpComponent implements OnInit {
   onSubmit() {
     this.clicked = true;
     if (this.registerForm.valid) {
-      console.log('Form submitted:', this.registerForm.value);
       const user = {
         name: this.registerForm.value.username,
         email: this.registerForm.value.email,
@@ -60,10 +59,8 @@ export class SignUpComponent implements OnInit {
         conformPassword: this.registerForm.value.passwordGroup.confirmPassword,
         number: this.registerForm.value.number,
       };
-      console.log('user', user);
       this.authService.saveUser(user).subscribe({
         next: (response: any) => {
-          console.log('response', response);
           if (response && response.token) {
             this.authService.store(response.token, response.message);
             this.router.navigate(['/calendar']);

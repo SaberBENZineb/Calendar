@@ -8,10 +8,9 @@ export const authGuard: CanActivateFn = (route:ActivatedRouteSnapshot, state:Rou
   const  router:Router=inject(Router);
   
   const protectedRoutes:string[]=["/calendar"];
-
+  
   return authService.isAuthenticated().pipe(map((loggedIn: boolean) => {
     if (protectedRoutes.includes(state.url) && !loggedIn) {
-      console.log("loggedIn: "+loggedIn);
       router.navigate(["/login"]);
       return false;
     }

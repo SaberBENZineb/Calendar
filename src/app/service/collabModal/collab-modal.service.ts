@@ -5,22 +5,16 @@ import { CalendarEvent } from 'angular-calendar';
 @Injectable({
   providedIn: 'root'
 })
-export class ModalService {
+export class CollabModalService {
   private modalRef: NgbModalRef | undefined;
   constructor(private modal: NgbModal) {}
 
   open(content: TemplateRef<any>, data: { event: CalendarEvent }): any {
-    this.modalRef = this.modal.open(content);
+    this.modalRef = this.modal.open(content, { size: 'xl' });
     if (this.modalRef.componentInstance) {
       this.modalRef.componentInstance.modalData = data;
       this.modalRef.componentInstance.action = data.event ? 'Update' : 'Add';
     }
-
-    return this.modalRef.result.then(
-      (result) => {
-        return result;
-      }
-    );
   }
 
   close(result?: any): void {

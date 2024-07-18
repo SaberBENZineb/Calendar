@@ -68,4 +68,28 @@ export class EventService {
       })
     );
   }
+
+  getEventUsers(eventId:number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/api/v1/admin/${eventId}/users`).pipe(
+      tap((response) => {
+        return response;
+      }),
+      catchError((error) => {
+        console.log('error: ' + error.message);
+        return of([]);
+      })
+    );
+  }
+  
+  unassign(userId:number,eventId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/api/v1/admin/unassign/${eventId}/${userId}`).pipe(
+      tap((response) => {
+        return response;
+      }),
+      catchError((error) => {
+        console.log('error: ' + error.message);
+        return of(null);
+      })
+    );
+  }
 }

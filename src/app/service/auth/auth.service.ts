@@ -16,7 +16,6 @@ export class AuthService {
   saveUser(user: any): Observable<any> {
       if(user.password===user.conformPassword){
         delete user.conformPassword;
-        console.log("save:", JSON.stringify(user));
         return this.http.post(`${this.apiUrl}/register`,user).pipe(
           tap((response) => {
             return response;
@@ -27,7 +26,6 @@ export class AuthService {
           })
         );
       }else{
-        console.log("password not confirmed");
         return of(null);
       }
   }

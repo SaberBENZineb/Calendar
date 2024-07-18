@@ -21,10 +21,8 @@ export class LogInComponent {
             email:loginForm.value.email,
             password:loginForm.value.password,
           }
-          console.log(user);
           await this.authService.login(user).subscribe({
             next: (response: any) => {
-              console.log("response:",response);
               if (response && response.token) {
                 this.authService.store(response.token,response.message);
                 this.router.navigate(['/calendar']);

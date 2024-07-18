@@ -1,0 +1,30 @@
+<div class="modal-content">
+    <div class="modal-title" [ngStyle]="{ 'color': modalData.event.color.primary }">
+        {{modalData.event.title}}
+        <button type="button" class="btn-close" aria-label="Close" (click)="collab.dismiss('cross click')"></button>
+    </div>
+    
+    <p-table [value]="(users | async) || []" [tableStyle]="{ 'min-width': '50rem' }">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Number</th>
+                <th></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-user>
+            <tr>
+                <td>{{ user.name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.number }}</td>
+                <td>
+                    <button type="button" class="btn btn-danger" style="margin-bottom: 2px;"
+                        (click)="unassign(user.id,modalData.event.id)"> 
+                    Delete
+                </button>
+            </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

@@ -12,7 +12,8 @@ export interface MyCalendarEvent {
     beforeStart: boolean,
     afterEnd: boolean,
   },
-  allDay:boolean
+  allDay:boolean,
+  actions?:any
 }
 
 export function mapServerResponseToAngularFormat(serverResponse: any): MyCalendarEvent {
@@ -31,7 +32,7 @@ export function mapServerResponseToAngularFormat(serverResponse: any): MyCalenda
     resizable: {
       beforeStart: true,
       afterEnd: true
-    }
+    },
   };
 }
 

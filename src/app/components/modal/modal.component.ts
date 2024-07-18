@@ -28,6 +28,10 @@ export class ModalComponent {
     return start && end && start >= end;
   }
 
+  isEmtyTitle(): boolean | undefined{
+    return this.modalData.event.title.length < 0;
+  }
+
   onItemSelect(item: any) {
     this.selectedItems.push(item);
     this.selectedItemsChange.emit(this.selectedItems);
@@ -59,6 +63,11 @@ export class ModalComponent {
         itemsShowLimit: 2,
         allowSearchFilter: true,
       };
+    }
+  }
+  verifyAndClose():any{
+    if (!this.isEmtyTitle() && !this.endDateInvalid()){
+      this.modalService.close(this.modalData.event);
     }
   }
 }

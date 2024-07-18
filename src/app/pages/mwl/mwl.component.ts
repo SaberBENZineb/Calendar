@@ -3,7 +3,9 @@ import {
   Component,
   TemplateRef,
   ViewChild,
+  ViewEncapsulation
 } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import {
   CalendarEvent,
@@ -14,6 +16,7 @@ import { isSameDay, isSameMonth } from 'date-fns';
 import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AuthService } from 'src/app/service/auth/auth.service';
+import { CollabModalService } from 'src/app/service/collabModal/collab-modal.service';
 import { ModalService } from 'src/app/service/modal/modal.service';
 import {
   defaultEvent,
@@ -29,9 +32,14 @@ import { UserService } from '../../service/user/user.service';
   styleUrls:["./mwl.component.css"],
   templateUrl: './mwl.component.html',
   providers: [NgbActiveModal],
+  encapsulation: ViewEncapsulation.None
 })
 export class MwlComponent {
   @ViewChild('modalContent', { static: true }) modalContent:
+    | TemplateRef<any>
+    | undefined;
+
+  @ViewChild('collabContent', { static: true }) collabContent:
     | TemplateRef<any>
     | undefined;
 
@@ -52,16 +60,54 @@ export class MwlComponent {
   activeDayIsOpen: boolean = false;
   action: string = '';
 
+  actions:any[]=[];
+
   constructor(
     public modalService: ModalService,
     private eventService: EventService,
     public authService: AuthService,
-    private userService: UserService
-  ) {}
-
+    private userService: UserService,
+    private collab:CollabModalService,
+    private sanitizer: DomSanitizer,
+  ) {
+    this.initializeActions();
+  }
   ngOnInit() {
     this.loadEvents();
     this.modalData = { event: defaultEvent };
+  }
+
+
+  initializeActions(): void {
+    this.actions = [
+      {
+        label: this.sanitizer.bypassSecurityTrustHtml('<img src="assets/edit-1.svg" alt="edit" width="30" height="20">') as SafeHtml,
+        a11yLabel: 'Edit',
+        onClick: ({ event }: { event: CalendarEvent }): void => {
+          this.openModal(event);
+        },
+      },
+      {
+        label: this.sanitizer.bypassSecurityTrustHtml('<img src="assets/delete.svg" alt="delete" width="30" height="20">') as SafeHtml,
+        a11yLabel: 'Delete',
+        onClick: ({ event }: { event: MyCalendarEvent }): void => {
+          this.events.pipe(
+            map(events => events.filter(iEvent => iEvent.id !== event.id))
+          ).subscribe();
+          this.deleteEvent(event.id);
+        },
+      }
+    ];
+
+    if (this.authService.getRole() === 'ADMIN') {
+      this.actions.push({
+        label: this.sanitizer.bypassSecurityTrustHtml('<img src="assets/collaborating.png" alt="collaborating-in-circle" width="30" height="30">') as SafeHtml,
+        a11yLabel: 'Collaborating',
+        onClick: ({ event }: { event: MyCalendarEvent }): void => {
+          this.openCollabModal(event);
+        },
+      });
+    }
   }
 
   selectedUser: string = 'All';
@@ -76,26 +122,27 @@ export class MwlComponent {
           });
           let eventsArray: MyCalendarEvent[] = [];
           users.forEach((user: any) => {
-            console.log(user.assignedEvents);
             user.assignedEvents.forEach((event: any) => {
               if (
                 !eventsArray.some(
                   (existingEvent) => existingEvent.id === event.id
                 )
               ) {
-                eventsArray.push(mapServerResponseToAngularFormat(event));
+                let Myevent:MyCalendarEvent=mapServerResponseToAngularFormat(event);
+                Myevent.actions=this.actions
+                eventsArray.push(Myevent);
               }
             });
           });
-          console.log('events:', eventsArray);
           this.eventsSubject.next(eventsArray);
         });
       } else {
         this.eventService.getUserEvents().subscribe((events: any) => {
           let eventsArray: MyCalendarEvent[] = events.map((event: any) => {
-            return mapServerResponseToAngularFormat(event);
+            let Myevent:MyCalendarEvent=mapServerResponseToAngularFormat(event);
+            Myevent.actions=this.actions
+            return Myevent
           });
-          console.log('events:', eventsArray);
           this.eventsSubject.next(eventsArray);
         });
       }
@@ -106,11 +153,9 @@ export class MwlComponent {
 
   onUserSelectionChange(selectedUser: { name: string; code: string }): void {
     try {
-      console.log('selected User: ', selectedUser);
       let eventsArray: MyCalendarEvent[] = [];
       if (selectedUser.code === 'All') {
         this.userService.getUsers().subscribe((users: any) => {
-          console.log('getUsers: ', users);
           users.forEach((user: any) => {
             user.assignedEvents.forEach((event: any) => {
               if (
@@ -118,22 +163,23 @@ export class MwlComponent {
                   (existingEvent) => existingEvent.id === event.id
                 )
               ) {
-                eventsArray.push(mapServerResponseToAngularFormat(event));
+                let Myevent:MyCalendarEvent=mapServerResponseToAngularFormat(event);
+                Myevent.actions=this.actions
+                eventsArray.push(Myevent);
               }
             });
           });
-          console.log('eventsArray: ', eventsArray);
           this.eventsSubject.next(eventsArray);
         });
       } else {
         this.userService
           .getUserEventsByEmail(selectedUser.code)
           .subscribe((events: any) => {
-            console.log('getUserEvents: ', events);
             eventsArray = events.map((event: any) => {
-              return mapServerResponseToAngularFormat(event);
+              let Myevent:MyCalendarEvent=mapServerResponseToAngularFormat(event);
+              Myevent.actions=this.actions
+              return Myevent;
             });
-            console.log('events:', eventsArray);
             this.eventsSubject.next(eventsArray);
           });
       }
@@ -177,7 +223,6 @@ export class MwlComponent {
     );
     const updatedEvent = { ...event, start: newStart, end: newEnd };
     this.openModal(updatedEvent);
-    console.log('dragging: ' + JSON.stringify(updatedEvent));
   }
 
   async openModal(event: CalendarEvent) {
@@ -225,26 +270,21 @@ export class MwlComponent {
       let ServerEvent = transformEventForServer(result);
       this.eventService.saveEvent(ServerEvent).subscribe((response: any) => {
         newEvent.id = response.id;
-        console.log('add:' + JSON.stringify(ServerEvent));
+
+        newEvent.actions = this.actions;
+        this.eventsSubject.next([...this.eventsSubject.value, newEvent]);
+
         if (this.authService.getRole()=="ADMIN" && this.selectedItems.length>0) {
           let emails: string[] = this.selectedItems.map((item: any) => item.item_id);
-          console.log('emails ' + emails.toString());
 
-          this.userService.assignEventToUsers(emails, newEvent?.id).subscribe((res:any)=>{
-            console.log('Event assigned to users successfully ',res);
-          });
-          this.selectedItems=[];
+          this.userService.assignEventToUsers(emails, newEvent?.id).subscribe();
         }
-        
-        this.eventsSubject.next([...this.eventsSubject.value, newEvent]);
       });
     }
-    
   }
 
   async deleteEvent(eventId: number): Promise<void> {
     try {
-      console.log('eventId: ' + eventId);
       if (this.authService.getRole()=="ADMIN") {
         this.eventService.deleteEventForAll(eventId).subscribe(async ()=>{
           this.events = this.events.pipe(
@@ -256,8 +296,7 @@ export class MwlComponent {
           this.refresh.next();
         });
       } else {
-        this.eventService.deleteEvent(eventId).subscribe(async (res:any)=>{
-          console.log("res "+JSON.stringify(res));
+        this.eventService.deleteEvent(eventId).subscribe(async ()=>{
           this.events = this.events.pipe(
             map((events) => {
               return events.filter((e) => e.id !== eventId);
@@ -297,12 +336,9 @@ export class MwlComponent {
     if (updatedEvent) {
       const serverEventData = transformEventForServer(updatedEvent);
       this.eventService.updateEvent(serverEventData).subscribe((response:any)=>{
-        console.log("updated successfully: ",response);
         if (this.authService.getRole()=="ADMIN" && this.selectedItems.length>0) {
           let emails: string[] = this.selectedItems.map((item: any) => item.item_id);
-          console.log('emails ' + emails.toString());
           this.userService.assignEventToUsers(emails, event?.id).subscribe((res:any)=>{
-            console.log('Event assigned to users successfully ',res);
           });
         }
         this.events.subscribe();
@@ -321,5 +357,13 @@ export class MwlComponent {
 
   closeOpenMonthViewDay() {
     this.activeDayIsOpen = false;
+  }
+
+  async openCollabModal(event: CalendarEvent) {
+    this.modalData = { event };
+    await this.collab.open(
+      this.collabContent as TemplateRef<any>,
+      this.modalData
+    );
   }
 }

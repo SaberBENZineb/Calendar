@@ -60,10 +60,8 @@ export class UserService {
   }
 
   assignEventToUsers(emails: String[],eventId:any): Observable<any> {
-    console.log("assigning emails",emails);
     return this.http.put<any>(`${this.apiUrl}/api/v1/admin/event/${eventId}`,emails).pipe(
       tap((response) => {
-        console.log("res assignEventToUsers:"+response);
         return response;
       }),
       catchError(error => {

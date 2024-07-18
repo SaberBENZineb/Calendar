@@ -13,15 +13,16 @@ import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { MessageService } from 'primeng/api';
 import { CalendarModule as primengCalenadarModule } from 'primeng/calendar';
 import { DropdownModule } from 'primeng/dropdown';
+import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { CollabModalComponent } from './components/collab-modal/collab-modal.component';
+import { ModalComponent } from './components/modal/modal.component';
 import { LogInComponent } from './pages/log-in/log-in.component';
 import { MwlComponent } from './pages/mwl/mwl.component';
 import { SignUpComponent } from './pages/sign-up/sign-up.component';
 import { AuthInterceptor } from './service/interceptor/auth-interceptor.service';
-import { ModalComponent } from './components/modal/modal.component';
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -29,8 +30,10 @@ import { ModalComponent } from './components/modal/modal.component';
     SignUpComponent,
     LogInComponent,
     ModalComponent,
+    CollabModalComponent,
   ],
   imports: [
+    TableModule,
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,

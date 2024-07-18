@@ -33,6 +33,22 @@ pre {
 }
 
 .event-title:hover {
-    text-decoration: underline;
-    cursor: pointer;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (max-width: 767.98px) {
+  .event-title {
+    white-space: nowrap;      /* Prevent text from wrapping */
+    overflow: hidden;         /* Hide overflow content */
+    text-overflow: ellipsis;  /* Display ellipsis for overflow content */
+    display: block;           /* Make the element block-level */
+    width: 100%;               /* Set the width to 20% */
   }
+
+  .cal-month-view .cal-day-cell.cal-in-month.cal-has-events {
+    width: 14%;
+}
+}
+
+
